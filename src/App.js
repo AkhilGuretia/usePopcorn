@@ -62,9 +62,39 @@ const Navbar = () => {
 const Main = () => {
   return (
     <main className="main">
-      <div className="box"></div>
+      <div className="box">
+
+        <button className="btn-toggle">
+          +
+        </button>
+
+        <ul className="list">
+          {tempMovieData.map((movie) => (
+            <Movie movie={movie} key={movie.imdbID} />
+          ))}
+        </ul>
+
+      </div>
       <div className="box"></div>
     </main>
+  );
+}
+
+const Movie = ({ movie }) => {
+  return (
+    <li key={movie.imdbID}>
+
+      <img src={movie.Poster} alt={`${movie.Title} poster`} />
+      <h3>{movie.Title}</h3>
+
+      <div>
+        <p>
+          <span>🗓</span>
+          <span>{movie.Year}</span>
+        </p>
+      </div>
+
+    </li>
   );
 }
 
