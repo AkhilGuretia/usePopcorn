@@ -75,7 +75,35 @@ const Main = () => {
         </ul>
 
       </div>
-      <div className="box"></div>
+
+      <div className="box">
+
+        <button className="btn-toggle">+</button>
+
+        <div className="summary">
+          <h2>Movies you watched</h2>
+          <div>
+            <p>
+              <span>#️⃣</span>
+              <span>movies</span>
+            </p>
+            <p>
+              <span>⭐️</span>
+              <span>Imdb</span>
+            </p>
+            <p>
+              <span>🌟</span>
+              <span>User</span>
+            </p>
+            <p>
+              <span>⏳</span>
+              <span>avgRun</span>
+            </p>
+          </div>
+        </div>
+
+
+      </div>
     </main>
   );
 }
