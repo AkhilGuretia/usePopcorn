@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 const tempMovieData = [
   {
@@ -48,8 +48,16 @@ const tempWatchedData = [
 ];
 
 const App = () => {
-  const [movies, setMovies] = useState(tempMovieData);
+  const [movies, setMovies] = useState([]);
   const [watched, setWatched] = useState(tempWatchedData);
+
+  const KEY = "f55cb1f1";
+
+  useEffect(() => {
+    fetch(`https://www.omdbapi.com/?i=tt3896198&apikey=${KEY}&s=interstellar`)
+      .then((res) => res.json())
+      .then((data) => setMovies(data.Search));
+  }, []);
 
   return (
     <>
@@ -58,7 +66,6 @@ const App = () => {
       </Navbar>
 
       <Main>
-
         <Box>
           <MovieList movies={movies} />
         </Box>
@@ -69,15 +76,12 @@ const App = () => {
             <WatchedMoviesList watched={watched} />
           </>
         </Box>
-
       </Main>
     </>
   );
-}
+};
 
 const Navbar = ({ children }) => {
-
-
   return (
     <nav className="nav-bar">
       <Logo />
@@ -87,7 +91,7 @@ const Navbar = ({ children }) => {
       {children}
     </nav>
   );
-}
+};
 
 const Logo = () => {
   return (
@@ -96,73 +100,61 @@ const Logo = () => {
       <h1>usePopcorn</h1>
     </div>
   );
-}
+};
 
 const NumResults = ({ movies }) => {
   return (
     <p className="num-results">
-      Found <strong>{movies.length}</strong> results
+      Found <strong>{movies.length > 0 ? movies.length : 0}</strong> results
     </p>
-
   );
-}
+};
 
 const Search = () => {
-
   const [query, setQuery] = useState("");
 
   return (
     <input
-      className="search" type="text" placeholder="Search movies..."
-      value={query} onChange={(event) => setQuery(event.target.value)}
+      className="search"
+      type="text"
+      placeholder="Search movies..."
+      value={query}
+      onChange={(event) => setQuery(event.target.value)}
     />
-  )
-    ;
+  );
 };
 
 const Main = ({ children }) => {
-
-  return (
-    <main className="main">
-      {children}
-    </main>
-  );
-}
+  return <main className="main">{children}</main>;
+};
 
 const Box = ({ children }) => {
   const [isOpen, setIsOpen] = useState(true);
 
   return (
     <div className="box">
-
-      <button
-        className="btn-toggle"
-        onClick={() => setIsOpen((open) => !open)}
-      >
+      <button className="btn-toggle" onClick={() => setIsOpen((open) => !open)}>
         {isOpen ? "-" : "+"}
       </button>
 
       {isOpen && children}
-
     </div>
   );
-}
+};
 
 const MovieList = ({ movies }) => {
-
   return (
     <ul className="list">
-      {movies.map((movie) => (
+      {movies?.map((movie) => (
         <Movie movie={movie} key={movie.imdbID} />
       ))}
     </ul>
   );
-}
+};
 
 const Movie = ({ movie }) => {
   return (
     <li>
-
       <img src={movie.Poster} alt={`${movie.Title} poster`} />
       <h3>{movie.Title}</h3>
 
@@ -172,15 +164,14 @@ const Movie = ({ movie }) => {
           <span>{movie.Year}</span>
         </p>
       </div>
-
     </li>
   );
-}
+};
 
-const average = (arr) => arr.reduce((acc, cur, i, arr) => acc + cur / arr.length, 0);
+const average = (arr) =>
+  arr.reduce((acc, cur, i, arr) => acc + cur / arr.length, 0);
 
 const WatchedSummary = ({ watched }) => {
-
   const avgImdbRating = average(watched.map((movie) => movie.imdbRating));
   const avgUserRating = average(watched.map((movie) => movie.userRating));
   const avgRunTime = average(watched.map((movie) => movie.runtime));
@@ -208,7 +199,7 @@ const WatchedSummary = ({ watched }) => {
       </div>
     </div>
   );
-}
+};
 
 const WatchedMoviesList = ({ watched }) => {
   return (
@@ -218,13 +209,11 @@ const WatchedMoviesList = ({ watched }) => {
       ))}
     </ul>
   );
-}
+};
 
 const WatchedMovie = ({ movie }) => {
-
   return (
     <li>
-
       <img src={movie.Poster} alt={`${movie.Title} poster`} />
       <h3>{movie.Title}</h3>
 
@@ -242,9 +231,8 @@ const WatchedMovie = ({ movie }) => {
           <span>{movie.runtime} min</span>
         </p>
       </div>
-
-    </li >
+    </li>
   );
-}
+};
 
 export default App;
