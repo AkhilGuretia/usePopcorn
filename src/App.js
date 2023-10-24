@@ -1,29 +1,5 @@
 import { useEffect, useState } from "react";
 
-const tempMovieData = [
-  {
-    imdbID: "tt1375666",
-    Title: "Inception",
-    Year: "2010",
-    Poster:
-      "https://m.media-amazon.com/images/M/MV5BMjAxMzY3NjcxNF5BMl5BanBnXkFtZTcwNTI5OTM0Mw@@._V1_SX300.jpg",
-  },
-  {
-    imdbID: "tt0133093",
-    Title: "The Matrix",
-    Year: "1999",
-    Poster:
-      "https://m.media-amazon.com/images/M/MV5BNzQzOTk3OTAtNDQ0Zi00ZTVkLWI0MTEtMDllZjNkYzNjNTc4L2ltYWdlXkEyXkFqcGdeQXVyNjU0OTQ0OTY@._V1_SX300.jpg",
-  },
-  {
-    imdbID: "tt6751668",
-    Title: "Parasite",
-    Year: "2019",
-    Poster:
-      "https://m.media-amazon.com/images/M/MV5BYWZjMjk3ZTItODQ2ZC00NTY5LWE0ZDYtZTI3MjcwN2Q5NTVkXkEyXkFqcGdeQXVyODk4OTc3MTY@._V1_SX300.jpg",
-  },
-];
-
 const tempWatchedData = [
   {
     imdbID: "tt1375666",
@@ -50,25 +26,34 @@ const tempWatchedData = [
 const App = () => {
   const [movies, setMovies] = useState([]);
   const [watched, setWatched] = useState(tempWatchedData);
+  const [isLoading, setisLoading] = useState(false);
+  const [query, setQuery] = useState("");
 
   const KEY = "f55cb1f1";
 
   useEffect(() => {
-    fetch(`https://www.omdbapi.com/?i=tt3896198&apikey=${KEY}&s=interstellar`)
-      .then((res) => res.json())
-      .then((data) => setMovies(data.Search));
-  }, []);
+    async function fetchMoviesData() {
+      setisLoading(true);
+      const res = await fetch(
+        `https://www.omdbapi.com/?i=tt3896198&apikey=${KEY}&s=${query}`
+      );
+      const data = await res.json();
+      setisLoading(false);
+      setMovies(data.Search);
+    }
+
+    fetchMoviesData();
+  }, [query]);
 
   return (
     <>
       <Navbar>
+        <Search query={query} setQuery={setQuery} />
         <NumResults movies={movies} />
       </Navbar>
 
       <Main>
-        <Box>
-          <MovieList movies={movies} />
-        </Box>
+        <Box>{isLoading ? <Loader /> : <MovieList movies={movies} />}</Box>
 
         <Box>
           <>
@@ -85,8 +70,6 @@ const Navbar = ({ children }) => {
   return (
     <nav className="nav-bar">
       <Logo />
-
-      <Search />
 
       {children}
     </nav>
@@ -105,14 +88,12 @@ const Logo = () => {
 const NumResults = ({ movies }) => {
   return (
     <p className="num-results">
-      Found <strong>{movies.length > 0 ? movies.length : 0}</strong> results
+      Found <strong>{movies ? movies.length : "No"}</strong> results
     </p>
   );
 };
 
-const Search = () => {
-  const [query, setQuery] = useState("");
-
+const Search = ({ query, setQuery }) => {
   return (
     <input
       className="search"
@@ -140,6 +121,10 @@ const Box = ({ children }) => {
       {isOpen && children}
     </div>
   );
+};
+
+const Loader = () => {
+  return <p className="loader">Loading... </p>;
 };
 
 const MovieList = ({ movies }) => {
