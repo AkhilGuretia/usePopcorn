@@ -27,33 +27,49 @@ const App = () => {
   const [movies, setMovies] = useState([]);
   const [watched, setWatched] = useState(tempWatchedData);
   const [isLoading, setisLoading] = useState(false);
-  const [query, setQuery] = useState("");
+  const [error, setError] = useState("");
+  // const [query, setQuery] = useState("");
 
   const KEY = "f55cb1f1";
 
   useEffect(() => {
     async function fetchMoviesData() {
-      setisLoading(true);
-      const res = await fetch(
-        `https://www.omdbapi.com/?i=tt3896198&apikey=${KEY}&s=${query}`
-      );
-      const data = await res.json();
-      setisLoading(false);
-      setMovies(data.Search);
+      try {
+        setisLoading(true);
+        const res = await fetch(
+          `https://www.omdbapi.com/?i=tt3896198&apikey=${KEY}&s=DSdqwdq`
+        );
+
+        if (!res.ok)
+          throw new Error("Something went wrong while fetching the movies");
+
+        const data = await res.json();
+
+        if (data.Response === "False") throw new Error("Movie not found");
+        setMovies(data.Search);
+      } catch (error) {
+        setError(error.message);
+      } finally {
+        setisLoading(false);
+      }
     }
 
     fetchMoviesData();
-  }, [query]);
+  }, []);
 
   return (
     <>
       <Navbar>
-        <Search query={query} setQuery={setQuery} />
+        <Search />
         <NumResults movies={movies} />
       </Navbar>
 
       <Main>
-        <Box>{isLoading ? <Loader /> : <MovieList movies={movies} />}</Box>
+        <Box>
+          {!isLoading && !error && <MovieList movies={movies} />}
+          {error && <ErrorMessage error={error} />}
+          {isLoading && <Loader />}
+        </Box>
 
         <Box>
           <>
@@ -100,7 +116,7 @@ const Search = ({ query, setQuery }) => {
       type="text"
       placeholder="Search movies..."
       value={query}
-      onChange={(event) => setQuery(event.target.value)}
+      // onChange={(event) => setQuery(event.target.value)}
     />
   );
 };
@@ -125,6 +141,15 @@ const Box = ({ children }) => {
 
 const Loader = () => {
   return <p className="loader">Loading... </p>;
+};
+
+const ErrorMessage = ({ error }) => {
+  return (
+    <p className="error">
+      <span>❌</span>
+      {error}
+    </p>
+  );
 };
 
 const MovieList = ({ movies }) => {
