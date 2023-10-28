@@ -28,7 +28,7 @@ const App = () => {
   const [watched, setWatched] = useState(tempWatchedData);
   const [isLoading, setisLoading] = useState(false);
   const [error, setError] = useState("");
-  // const [query, setQuery] = useState("");
+  const [query, setQuery] = useState("");
 
   const KEY = "f55cb1f1";
 
@@ -36,8 +36,9 @@ const App = () => {
     async function fetchMoviesData() {
       try {
         setisLoading(true);
+        setError("");
         const res = await fetch(
-          `https://www.omdbapi.com/?i=tt3896198&apikey=${KEY}&s=DSdqwdq`
+          `https://www.omdbapi.com/?i=tt3896198&apikey=${KEY}&s=${query}`
         );
 
         if (!res.ok)
@@ -54,13 +55,19 @@ const App = () => {
       }
     }
 
+    if (query.length < 2) {
+      setError("");
+      setMovies([]);
+      return;
+    }
+
     fetchMoviesData();
-  }, []);
+  }, [query]);
 
   return (
     <>
       <Navbar>
-        <Search />
+        <Search query={query} setQuery={setQuery} />
         <NumResults movies={movies} />
       </Navbar>
 
@@ -116,7 +123,7 @@ const Search = ({ query, setQuery }) => {
       type="text"
       placeholder="Search movies..."
       value={query}
-      // onChange={(event) => setQuery(event.target.value)}
+      onChange={(event) => setQuery(event.target.value)}
     />
   );
 };
