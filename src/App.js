@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import StarRating from "./StarRating";
 
 const tempWatchedData = [
   {
@@ -23,6 +24,8 @@ const tempWatchedData = [
   },
 ];
 
+const KEY = "f55cb1f1";
+
 const App = () => {
   const [movies, setMovies] = useState([]);
   const [watched, setWatched] = useState(tempWatchedData);
@@ -30,8 +33,6 @@ const App = () => {
   const [error, setError] = useState("");
   const [query, setQuery] = useState("");
   const [selectedId, setSelectedId] = useState(null);
-
-  const KEY = "f55cb1f1";
 
   const handleSelectedMovie = (id) => {
     setSelectedId((selectedId) => (id === selectedId ? null : id));
@@ -91,7 +92,10 @@ const App = () => {
 
         <Box>
           {selectedId ? (
-            <MovieDetails onCloseMovie={handleCloseMovie} />
+            <MovieDetails
+              selectedId={selectedId}
+              onCloseMovie={handleCloseMovie}
+            />
           ) : (
             <>
               <WatchedSummary watched={watched} />
@@ -200,17 +204,76 @@ const Movie = ({ movie, onSelectMovie }) => {
   );
 };
 
-const MovieDetails = ({ onCloseMovie }) => {
+const MovieDetails = ({ selectedId, onCloseMovie }) => {
+  const [movie, setMovie] = useState({});
+  const [isLoading, setisLoading] = useState(false);
+
+  const {
+    Title: title,
+    Year: year,
+    Poster: poster,
+    Runtime: runtime,
+    imdbRating,
+    Plot: plot,
+    Released: released,
+    Actors: actors,
+    Director: director,
+    Genre: genre,
+  } = movie;
+
+  useEffect(() => {
+    const getMovieDetails = async () => {
+      setisLoading(true);
+      const res = await fetch(
+        `https://www.omdbapi.com/?apikey=${KEY}&i=${selectedId}`
+      );
+
+      const data = await res.json();
+
+      setMovie(data);
+      setisLoading(false);
+    };
+
+    getMovieDetails();
+  }, [selectedId]);
+
   return (
-    <>
-      <button className="btn-back" onClick={onCloseMovie}>
-        &larr;
-      </button>
-      <section>
-        <h2>Movie Details</h2>
-        <p> Truth or Dare ? </p>
-      </section>
-    </>
+    <div className="details">
+      {isLoading ? (
+        <Loader />
+      ) : (
+        <>
+          <header>
+            <button className="btn-back" onClick={onCloseMovie}>
+              &larr;
+            </button>
+            <img src={poster} alt={`poster of ${movie} movie`} />
+            <div className="details-overview">
+              <h2>{title}</h2>
+              <p>
+                {released} &bull; {runtime}
+              </p>
+              <p> {genre}</p>
+              <p>
+                <span>⭐</span>
+                {imdbRating} IMDb rating
+              </p>
+            </div>
+          </header>
+
+          <section>
+            <div className="rating">
+              <StarRating maxRating={10} size={24} />
+            </div>
+            <p>
+              <em>{plot}</em>
+            </p>
+            <p>Starring {actors}</p>
+            <p>Directed by {director}</p>
+          </section>
+        </>
+      )}
+    </div>
   );
 };
 
