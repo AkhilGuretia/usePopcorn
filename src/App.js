@@ -61,6 +61,7 @@ const App = () => {
       return;
     }
 
+    handleCloseMovie();
     fetchMoviesData();
 
     return () => controller.abort();
@@ -261,6 +262,18 @@ const MovieDetails = ({ selectedId, onCloseMovie, onAddMovie, watched }) => {
 
     return () => (document.title = "usePopcorn");
   }, [title]);
+
+  useEffect(() => {
+    const callBack = (event) => {
+      if (event.code === "Escape") {
+        onCloseMovie();
+      }
+    };
+
+    document.addEventListener("keydown", callBack);
+
+    return () => document.removeEventListener("keydown", callBack);
+  }, [onCloseMovie]);
 
   return (
     <div className="details">
