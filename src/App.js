@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import StarRating from "./StarRating";
 
 const KEY = "f55cb1f1";
@@ -141,6 +141,23 @@ const NumResults = ({ movies }) => {
 };
 
 const Search = ({ query, setQuery }) => {
+  const inputEl = useRef(null);
+
+  useEffect(() => {
+    const callBack = (event) => {
+      if (document.activeElement === inputEl.current) return;
+
+      if (event.code === "Enter") {
+        inputEl.current.focus();
+        setQuery("");
+      }
+    };
+
+    document.addEventListener("keydown", callBack);
+
+    return () => document.removeEventListener("keydown", callBack);
+  }, [setQuery]);
+
   return (
     <input
       className="search"
@@ -148,6 +165,7 @@ const Search = ({ query, setQuery }) => {
       placeholder="Search movies..."
       value={query}
       onChange={(event) => setQuery(event.target.value)}
+      ref={inputEl}
     />
   );
 };
