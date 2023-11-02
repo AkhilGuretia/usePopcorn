@@ -206,6 +206,7 @@ const MovieDetails = ({ selectedId, onCloseMovie, onAddMovie, watched }) => {
   const [movie, setMovie] = useState({});
   const [isLoading, setisLoading] = useState(false);
   const [userRating, setUserRating] = useState(null);
+  const [error, setError] = useState("");
 
   const iswatched = watched.some((movie) => movie.imdbID === selectedId);
   const userMovieRating = watched.find(
@@ -241,19 +242,34 @@ const MovieDetails = ({ selectedId, onCloseMovie, onAddMovie, watched }) => {
   };
 
   useEffect(() => {
+    const controller = new AbortController();
     const getMovieDetails = async () => {
-      setisLoading(true);
-      const res = await fetch(
-        `https://www.omdbapi.com/?apikey=${KEY}&i=${selectedId}`
-      );
+      try {
+        setisLoading(true);
+        setError("");
+        const res = await fetch(
+          `https://www.omdbapi.com/?apikey=${KEY}&i=${selectedId}`,
+          { signal: controller.signal }
+        );
 
-      const data = await res.json();
+        if (!res.ok)
+          throw new Error("Something went wrong while fetching the movies");
 
-      setMovie(data);
-      setisLoading(false);
+        const data = await res.json();
+
+        if (data.Response === "False") throw new Error("Movie not found");
+        setMovie(data);
+        setError("");
+      } catch (error) {
+        if (error.name === "AbortError") return;
+        setError(error.message);
+      } finally {
+        setisLoading(false);
+      }
     };
 
     getMovieDetails();
+    return () => controller.abort();
   }, [selectedId]);
 
   useEffect(() => {
@@ -279,6 +295,8 @@ const MovieDetails = ({ selectedId, onCloseMovie, onAddMovie, watched }) => {
     <div className="details">
       {isLoading ? (
         <Loader />
+      ) : error ? (
+        <ErrorMessage error={error} />
       ) : (
         <>
           <header>
