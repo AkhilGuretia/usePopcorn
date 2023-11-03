@@ -158,6 +158,10 @@ const Search = ({ query, setQuery }) => {
     return () => document.removeEventListener("keydown", callBack);
   }, [setQuery]);
 
+  useEffect(() => {
+    inputEl.current.focus();
+  }, []);
+
   return (
     <input
       className="search"
@@ -238,6 +242,12 @@ const MovieDetails = ({ selectedId, onCloseMovie, onAddMovie, watched }) => {
     (movie) => movie.imdbID === selectedId
   )?.userRating;
 
+  const countRatingRef = useRef(0);
+
+  useEffect(() => {
+    if (userRating) countRatingRef.current++;
+  }, [userRating]);
+
   const {
     Title: title,
     Year: year,
@@ -260,6 +270,7 @@ const MovieDetails = ({ selectedId, onCloseMovie, onAddMovie, watched }) => {
       runtime: Number(runtime.split(" ").at(0)),
       imdbRating: Number(imdbRating),
       userRating: userRating,
+      countRatingDecisions: countRatingRef.current,
     };
 
     onAddMovie(newWatchedMovie);
